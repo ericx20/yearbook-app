@@ -1,6 +1,8 @@
 const clearButton = document.querySelector('.clear');
 const undoButton = document.querySelector('.undo');
 const redoButton = document.querySelector('.redo');
+const downloadButton = document.querySelector('.download')
+// const eraseButton = document.querySelector('.erase')
 const stroke_weight = document.querySelector('.stroke-weight');
 const color_picker = document.querySelector('.color-picker');
 
@@ -18,9 +20,9 @@ addEventListener('keydown', testing)
 
 window.addEventListener('resize', resizeCanvas);
 clearButton.addEventListener('click', clearCanvas);
-// undoButton.addEventListener('click', console.log('undo lol'));
-// redoButton.addEventListener('click', console.log('redo lol'));
-
+undoButton.addEventListener('click', clearCanvas);
+redoButton.addEventListener('click', clearCanvas);
+downloadButton.addEventListener('click', downloadImage);
 
 // display the newLine when you press F
 function testing (e) {
@@ -31,9 +33,7 @@ function testing (e) {
         console.log('testing G');
         console.log(strokeList.length)
         strokeList.forEach(line => {
-            ctx.beginPath();
             ctx.stroke(line);
-            ctx.beginPath();
         })
     }
 }
@@ -51,6 +51,7 @@ function draw ({ clientX: x, clientY: y }) {
     ctx.lineWidth = stroke_weight.value;
     ctx.lineCap = "round";
     ctx.strokeStyle = color_picker.value;
+    document.getElementById("colors").style.background = color_picker.value;
 
     newLine.lineTo(x, y);
 
@@ -77,6 +78,11 @@ function clearCanvas() {
 function resizeCanvas () {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+}
+
+function downloadImage () {
+    let dataURL = canvas.toDataURL('image/png')
+    console.log(dataURL)
 }
 
 resizeCanvas();

@@ -101,7 +101,7 @@ main {
     outline: none;
     cursor: pointer;
   }
-  .undo, .redo {
+  .undo, .redo, .download, .erase {
     @extend .clear;
     font-size: 8px;
   }

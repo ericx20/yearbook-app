@@ -82,7 +82,7 @@ main .thickness:hover .stroke-weight {
   display: block;
 }
 
-main .clear, main .undo, main .redo {
+main .clear, main .undo, main .redo, main .download, main .erase {
   display: block;
   width: 30px;
   height: 30px;
@@ -96,7 +96,7 @@ main .clear, main .undo, main .redo {
   cursor: pointer;
 }
 
-main .undo, main .redo {
+main .undo, main .redo, main .download, main .erase {
   font-size: 8px;
 }
 /*# sourceMappingURL=main.min.css.map */
