@@ -92,7 +92,7 @@ main {
     display: block;
     width: 30px;
     height: 30px;
-    margin: 0 auto;
+    margin: 0 auto 15px auto;
     color: $dark;
     font-size: 20px;
     font-weight: 900;
@@ -100,5 +100,9 @@ main {
     border: none;
     outline: none;
     cursor: pointer;
+  }
+  .undo, .redo {
+    @extend .clear;
+    font-size: 8px;
   }
 }

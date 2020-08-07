@@ -82,11 +82,11 @@ main .thickness:hover .stroke-weight {
   display: block;
 }
 
-main .clear {
+main .clear, main .undo, main .redo {
   display: block;
   width: 30px;
   height: 30px;
-  margin: 0 auto;
+  margin: 0 auto 15px auto;
   color: #171717;
   font-size: 20px;
   font-weight: 900;
@@ -94,5 +94,9 @@ main .clear {
   border: none;
   outline: none;
   cursor: pointer;
+}
+
+main .undo, main .redo {
+  font-size: 8px;
 }
 /*# sourceMappingURL=main.min.css.map */
