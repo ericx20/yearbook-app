@@ -1,5 +1,6 @@
 $primary: #FFCE00;
 $dark: #171717;
+$darker: black;
 $light: #F3F3F3;
 
 body {
@@ -7,8 +8,16 @@ body {
   padding: 0;
   width: 100vw;
   height: 100vh;
-  background: $light;
+  background: $darker;
   font-family: 'Roboto', 'Helvetica', sans-serif;
+
+  canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+  }
 }
 
 main {
@@ -88,21 +97,31 @@ main {
     }
   }
 
-  .clear {
+  .button {
     display: block;
     width: 30px;
     height: 30px;
     margin: 0 auto 15px auto;
     color: $dark;
-    font-size: 20px;
+    font-size: 8px;
     font-weight: 900;
-    background-color: $primary;
+    background-color: $light;
     border: none;
     outline: none;
     cursor: pointer;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
   }
-  .undo, .redo, .download, .erase {
-    @extend .clear;
-    font-size: 8px;
+  .button.clear {
+    font-size: 20px;
+  }
+
+  .button.download img {
+    max-width: 18px;
+    max-height: 18px;
+    transform: translate(6px, 6px);
   }
 }
