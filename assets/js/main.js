@@ -11,10 +11,12 @@ const ctx = canvas.getContext('2d');
 const WIDTH = 624;
 const HEIGHT = 800;
 
+// global variables
 var isDrawing = false;
-const strokeList = [];
-var newLine = new Path2D();
-
+var currentWeight = 3;
+var currentColor = "#000000";
+var currentLine = new Path2D();
+const lineList = [];
 
 // event listeners
 canvas.addEventListener('mousedown', start);
@@ -27,22 +29,21 @@ clearButton.addEventListener('click', clearCanvas);
 undoButton.addEventListener('click', undo);
 downloadButton.addEventListener('click', downloadImage);
 
-// display the newLine when you press F
+// display the currentLine when you press F
 function testing (e) {
     if (e.code === 'KeyF') {
-        console.log('prev stroke has been displayed');
-        ctx.stroke(newLine);
+        // log number of lines
+        console.log(lineList.length);
     } else if (e.code === 'KeyG') {
+        // trying to convert lines to json
         console.log('testing G');
-        ctx.strokeStyle = "#FF0000";
-        ctx.stroke(strokeList[strokeList.length-1]);
-        console.log(JSON.stringify(strokeList[0]));
+        console.log(JSON.stringify(lineList[lineList.length-1]));
     }
 }
 
 function start(e) {
     isDrawing = true;
-    newLine = new Path2D();
+    currentLine = new Path2D();
     console.log("start");
     draw(e);
 }
@@ -53,12 +54,16 @@ function draw({ clientX, clientY}) {
     x = clientX - (window.innerWidth - WIDTH) / 2;
     y = clientY - (window.innerHeight - HEIGHT) / 2;
 
-    ctx.lineWidth = stroke_weight.value;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = color_picker.value;
-    document.getElementById("colors").style.background = color_picker.value;
+    currentWeight = stroke_weight.value;
+    currentColor = color_picker.value;
 
-    newLine.lineTo(x, y);
+    ctx.lineWidth = currentWeight;
+    ctx.strokeStyle = currentColor;
+    // ctx.lineCap = "round";
+    
+    document.getElementById("colors").style.background = currentColor;
+
+    currentLine.lineTo(x, y);
 
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -68,32 +73,33 @@ function draw({ clientX, clientY}) {
 
 function stop() {
     isDrawing = false;
-    console.log("stop");
     ctx.beginPath();
-    strokeList.push(newLine);
-    
+
+    currentLine.color = currentColor;
+    currentLine.weight = currentWeight;
+    lineList.push(currentLine);
 }
 
 function clearCanvas() {
     console.log("clear");
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    whiteRectangle = new Path2D();
+    whiteRectangle.rect(0, 0, WIDTH, HEIGHT);
+    whiteRectangle.color = "#FFFFFF";
+    lineList.push(whiteRectangle);
+
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
 }
 
 function undo() {
-    strokeList.pop();
-    clearCanvas()
-    strokeList.forEach(line => {
+    lineList.pop();
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    lineList.forEach(line => {
+        ctx.lineWidth = line.weight;
+        ctx.strokeStyle = line.color;
         ctx.stroke(line);
     })
 }
-
-
-// function resizeCanvas () {
-//     canvas.width = window.innerWidth;
-//     canvas.height = window.innerHeight;
-// }
 
 function downloadImage() {
     let dataURL = canvas.toDataURL('image/png');
@@ -103,6 +109,7 @@ function downloadImage() {
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 
-// resizeCanvas();
 ctx.fillStyle = "#FFFFFF";
 ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+ctx.lineCap = "round";
