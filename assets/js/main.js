@@ -1,6 +1,10 @@
 // NOTE: if i'm gonna implement erasing, i have to implement undo/redo stack
 // and that will change the way clearCanvas() works
 
+// also turns out can't convert path2d to json, therefore...
+// will record x & y while drawing into array, add that as custom property to path2d
+// when sending off to server, just send the x & y arrays of all strokes + color, weight, etc
+
 // fix order of these queryselectors, change to target ID instead...
 const clearButton = document.querySelector('.clear');
 const undoButton = document.querySelector('.undo');
@@ -54,6 +58,7 @@ function testing (e) {
         // trying to convert lines to json, but it always returns empty object????
         console.log('testing G');
         console.log(JSON.stringify(lineList[lineList.length-1]));
+        console.log(lineList[lineList.length-1]);
     }
 }
 
