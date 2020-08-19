@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yearbook App</title>
     <link rel="stylesheet" href="assets/css/main.min.css" />
 </head>
+
 <body>
     <canvas></canvas>
     <main>
@@ -15,20 +17,21 @@
         <section class="thickness">
             <input type="number" class="stroke-weight" value="3">
         </section>
-        <button class="button clear">X</button>
-        <button class="button pen">
-            <img src="./assets/img/pen.png"/>
+        <button class="button clear" onClick="clearCanvas()">X</button>
+        <button class="button pen" onClick="activatePen()">
+            <img src="./assets/img/pen.png" />
         </button>
-        <button class="button erase">
-            <img src="./assets/img/eraser.png"/>
+        <button class="button erase" onClick="activateEraser()">
+            <img src="./assets/img/eraser.png" />
         </button>
-        <button class="button undo">
-            <img src="./assets/img/undo.png"/>
+        <button class="button undo" onClick="undo()">
+            <img src="./assets/img/undo.png" />
         </button>
-        <a class="button download" target="_blank" download="export.png" href="">
-            <img src="./assets/img/download.png"/>
-        </a> 
+        <a class="button download" onClick="downloadImage()" target="_blank" download="export.png" href="">
+            <img src="./assets/img/download.png" />
+        </a>
     </main>
     <script src="assets/js/main.js"></script>
 </body>
+
 </html>

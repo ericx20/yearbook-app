@@ -4,8 +4,9 @@
 // also turns out can't convert path2d to json, therefore...
 // will record x & y while drawing into array, add that as custom property to path2d
 // when sending off to server, just send the x & y arrays of all strokes + color, weight, etc
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
 
-// fix order of these queryselectors, change to target ID instead...
 const clearButton = document.querySelector('.clear');
 const undoButton = document.querySelector('.undo');
 const downloadButton = document.querySelector('.download');
@@ -14,15 +15,11 @@ const eraseButton = document.querySelector('.erase');
 const stroke_weight = document.querySelector('.stroke-weight');
 const color_picker = document.querySelector('.color-picker');
 
-const canvas = document.querySelector('canvas');
-const ctx = canvas.getContext('2d');
-
 const WIDTH = 624;
 const HEIGHT = 800;
 const YELLOW = "#FFCE00";
 const WHITE = "#FFFFFF";
 const BLACK = "000000";
-
 
 // initialize global variables
 var isDrawing = false;
@@ -38,51 +35,48 @@ canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stop);
 addEventListener('keydown', testing)
 
-penButton.addEventListener('click', makePenActive);
-eraseButton.addEventListener('click', makeEraserActive);
-clearButton.addEventListener('click', clearCanvas);
-undoButton.addEventListener('click', undo);
-downloadButton.addEventListener('click', downloadImage);
-
 // setup canvas
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 ctx.lineCap = "round";
 
 // display the currentLine when you press F
-function testing (e) {
+function testing(e) {
     if (e.code === 'KeyF') {
         // log number of lines
         console.log(lineList.length);
     } else if (e.code === 'KeyG') {
         // trying to convert lines to json, but it always returns empty object????
         console.log('testing G');
-        console.log(JSON.stringify(lineList[lineList.length-1]));
-        console.log(lineList[lineList.length-1]);
+        console.log(JSON.stringify(lineList[lineList.length - 1]));
+        console.log(lineList[lineList.length - 1]);
     }
 }
 
-function makePenActive() {
+// sets pen as active tool
+function activatePen() {
     console.log("PEN ACTIVATED");
     activeTool = "pen";
     penButton.style.background = YELLOW;
     eraseButton.style.background = WHITE;
 }
 
-function makeEraserActive() {
+// sets eraser as active tool
+function activateEraser() {
     console.log("ERASER ACTIVATED");
     activeTool = "eraser";
     penButton.style.background = WHITE;
     eraseButton.style.background = YELLOW;
 }
 
+// starts drawing
 function start(e) {
     console.log("start");
     isDrawing = true;
     if (activeTool === "pen") {
         currentLine = new Path2D();
     }
-    
+
     draw(e);
 }
 
@@ -97,14 +91,14 @@ function draw({ clientX, clientY }) {
     if (activeTool === "pen") {
         currentWeight = stroke_weight.value;
         currentColor = color_picker.value;
-    
+
         ctx.lineWidth = currentWeight;
         ctx.strokeStyle = currentColor;
-    
+
         document.getElementById("colors").style.background = currentColor;
-    
+
         currentLine.lineTo(x, y);
-    
+
         ctx.lineTo(x, y);
         ctx.stroke();
         ctx.beginPath();
@@ -113,7 +107,7 @@ function draw({ clientX, clientY }) {
     } else {  // eraser time
         for (i = lineList.length - 1; i >= 0; i--) {
             var stroke = lineList[i];
-            if (ctx.isPointInStroke(stroke, x, y) && stroke.erasable) {
+            if (ctx.isPointInStroke(stroke, x, y)) {
                 console.log("hit");
                 lineList.splice(i);
                 redrawCanvas();
@@ -124,25 +118,26 @@ function draw({ clientX, clientY }) {
 
 }
 
+// stops drawing & saves current line
 function stop() {
     console.log("stop");
     isDrawing = false;
-    
+
     if (activeTool === "pen") {
         ctx.beginPath();
         currentLine.color = currentColor;
         currentLine.weight = currentWeight;
-        currentLine.erasable = true;
         lineList.push(currentLine);
     }
-
 }
 
+// overwrites entire canvas with white
 function drawWhiteRect() {
     ctx.fillStyle = WHITE;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 }
 
+// redraws canvas from list of lines
 function redrawCanvas() {
     drawWhiteRect();
     lineList.forEach(line => {
@@ -152,14 +147,13 @@ function redrawCanvas() {
     })
 }
 
-// clearing canvas = drawing white rectangle over everything
+// clears everything from canvas
 function clearCanvas() {
     console.log("clear");
 
     whiteRectangle = new Path2D();
     whiteRectangle.rect(0, 0, WIDTH, HEIGHT);
     whiteRectangle.color = WHITE;
-    whiteRectangle.erasable = false;
     lineList.push(whiteRectangle);
 
     drawWhiteRect();
@@ -179,4 +173,4 @@ function downloadImage() {
 
 
 drawWhiteRect();
-makePenActive();
+activatePen();
