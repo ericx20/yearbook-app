@@ -1,5 +1,14 @@
-// NOTE: if i'm gonna implement erasing, i have to implement undo/redo stack
-// and that will change the way clearCanvas() works
+/* TO-DO LIST
+ - get clearing and unclearing canvas working
+ - add coords to path object for converting to JSON without loss of path data
+ - start working on node backend
+
+   THOUGHTS
+ - should addLine and removeLine be combined into one function? (something like runCommand() 
+   shares a lot of code and whether it's add/remove can be made into argumnet
+   and it gets rid of "if add then add else if remove then remove" logic
+
+*/
 
 // also turns out can't convert path2d to json, therefore...
 // will record x & y while drawing into array, add that as custom property to path2d
@@ -8,7 +17,7 @@ const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
 const clearButton = document.querySelector('.clear');
-const undoButton = document.querySelector('.undo');
+// const undoButton = document.querySelector('.undo');
 const downloadButton = document.querySelector('.download');
 const penButton = document.querySelector('.pen');
 const eraseButton = document.querySelector('.erase');
@@ -21,13 +30,17 @@ const YELLOW = "#FFCE00";
 const WHITE = "#FFFFFF";
 const BLACK = "000000";
 
-// initialize global variables
+// program states
 var isDrawing = false;
 var activeTool = "pen";  // either "pen" or "erase"
 var currentWeight = 3;
 var currentColor = "#171717";
 var currentLine = new Path2D();
-const lineList = [];
+
+// history
+var lineList = [];  // all lines currently drawn to the canvas
+var undoStack = [];  // history of all actions
+var redoStack = [];  // history of undone actions that may be redone
 
 // event listeners
 canvas.addEventListener('mousedown', start);
@@ -40,18 +53,18 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 ctx.lineCap = "round";
 
-// display the currentLine when you press F
+// testing purposes
 function testing(e) {
     if (e.code === 'KeyF') {
-        // log number of lines
-        console.log(lineList.length);
+        // dump undoStack
+        console.log(undoStack);
     } else if (e.code === 'KeyG') {
-        // trying to convert lines to json, but it always returns empty object????
-        console.log('testing G');
-        console.log(JSON.stringify(lineList[lineList.length - 1]));
-        console.log(lineList[lineList.length - 1]);
+        // dump redoStack
+        console.log(redoStack);
     }
 }
+
+// -------- TOOLS -------- //
 
 // sets pen as active tool
 function activatePen() {
@@ -68,6 +81,8 @@ function activateEraser() {
     penButton.style.background = WHITE;
     eraseButton.style.background = YELLOW;
 }
+
+// -------- DRAWING -------- //
 
 // starts drawing
 function start(e) {
@@ -109,8 +124,7 @@ function draw({ clientX, clientY }) {
             var stroke = lineList[i];
             if (ctx.isPointInStroke(stroke, x, y)) {
                 console.log("hit");
-                lineList.splice(i);
-                redrawCanvas();
+                removeLine(stroke, i);
                 return;
             }
         }
@@ -127,9 +141,12 @@ function stop() {
         ctx.beginPath();
         currentLine.color = currentColor;
         currentLine.weight = currentWeight;
-        lineList.push(currentLine);
+        // add currentLine to the top of the lineList
+        addLine(currentLine, lineList.length);
     }
 }
+
+// -------- CANVAS -------- //
 
 // overwrites entire canvas with white
 function drawWhiteRect() {
@@ -149,20 +166,87 @@ function redrawCanvas() {
 
 // clears everything from canvas
 function clearCanvas() {
-    console.log("clear");
+    console.log("CLEAR DISABLED TEMPORARILY");
 
-    whiteRectangle = new Path2D();
-    whiteRectangle.rect(0, 0, WIDTH, HEIGHT);
-    whiteRectangle.color = WHITE;
-    lineList.push(whiteRectangle);
+    // whiteRectangle = new Path2D();
+    // whiteRectangle.rect(0, 0, WIDTH, HEIGHT);
+    // whiteRectangle.color = WHITE;
+    // // lineList.push(whiteRectangle);
 
-    drawWhiteRect();
+    // drawWhiteRect();
 }
+
+// -------- COMMANDS, UNDO, REDO -------- //
+// command consists of the following:
+// { command: string, line: Path2D, index: int}
+
+// addLine adds a new line at specified index of lineList
+function addLine(line, index, byUser = true) {
+    lineList.push(line);
+
+    ctx.lineWidth = line.weight;
+    ctx.strokeStyle = line.color;
+    ctx.stroke(line);
+
+    if (byUser) {
+        console.log("added line by user");
+        undoStack.push({ command: "add", line, index });
+        redoStack = [];
+    }
+}
+
+// removeLine removes existing line at specified index of lineList
+function removeLine(line, index, byUser = true) {
+    lineList.splice(index);
+    
+    redrawCanvas();
+    
+    if (byUser) {
+        console.log("removed line by user")
+        undoStack.push({ command: "remove", line, index });
+        redoStack = [];
+    }
+}
+
+
+// WORK IN PROGRESS... get this done later
+// function addLines(lines) {
+
+// }
 
 function undo() {
     console.log("undo");
-    lineList.pop();
-    redrawCanvas();
+    undoCommand = undoStack.pop();
+    redoStack.push(undoCommand);
+
+    // execute the inverse of the command, NOT as user
+    // as to not add this execution to any undo/redo stacks
+    const {command, line, index} = undoCommand;
+    if (command === "add") {
+        removeLine(line, index, false);
+    } else if (command === "remove") {
+        addLine(line, index, false);
+    }
+}
+
+function redo() {
+    if (redoStack.length === 0) {
+        console.log("CANNOT REDO");
+        return;
+    }
+
+    console.log("redo");
+    redoCommand = redoStack.pop();
+    undoStack.push(redoCommand);
+
+    // execute the command NOT as user
+    const {command, line, index} = redoCommand;
+    if (command === "add") {
+        addLine(line, index, false);
+    } else if (command === "remove") {
+        removeLine(line, index, false);
+    }
+    
 }
 
 function downloadImage() {
