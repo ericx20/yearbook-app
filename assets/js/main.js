@@ -55,12 +55,17 @@ ctx.lineCap = "round";
 
 // testing purposes
 function testing(e) {
-    if (e.code === 'KeyF') {
+    if (e.code === 'KeyS') {
         // dump undoStack
         console.log(undoStack);
-    } else if (e.code === 'KeyG') {
+    } else if (e.code === 'KeyD') {
         // dump redoStack
         console.log(redoStack);
+    } else if (e.code === 'KeyF') {
+        console.log(lineList);
+    } else if (e.code === 'KeyA') {
+        console.log("redrawing canvas");
+        redrawCanvas();
     }
 }
 
@@ -182,7 +187,7 @@ function clearCanvas() {
 
 // addLine adds a new line at specified index of lineList
 function addLine(line, index, byUser = true) {
-    lineList.push(line);
+    lineList.splice(index, 0, line)
 
     ctx.lineWidth = line.weight;
     ctx.strokeStyle = line.color;
@@ -197,7 +202,7 @@ function addLine(line, index, byUser = true) {
 
 // removeLine removes existing line at specified index of lineList
 function removeLine(line, index, byUser = true) {
-    lineList.splice(index);
+    lineList.splice(index, 1);
     
     redrawCanvas();
     
