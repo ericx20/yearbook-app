@@ -3,6 +3,6 @@ Virtual yearbook signing
 
 A web app that lets you sign yearbooks online!
 
-Currently I'm working on the Node.js backend which will let users store yearbooks and share with shareable links
+Currently, this repository only contains the frontend component. It's a fully functional drawing app that supports customizable brush, undo/redo, and PNG image export!
 
-This is really exciting and it will be done very soon!
+The Node backend is located on the yearbook-server repository, and for now it's a REST API. Very soon, both frontend and backend will be able to communicate with each other and deliver the full experience.
