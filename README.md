@@ -2,6 +2,7 @@
 Virtual yearbook signing
 
 A web app that lets you sign yearbooks online!
+![screenshot](https://ericx20.github.io/assets/img/yearbook.png)
 
 The front end is a fully functional drawing app that supports customizable brush, undo/redo, and PNG image export! Check it out [here (live demo)](https://ericx20.github.io/assets/yearbook-app-demo/index.html)
 
