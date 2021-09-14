@@ -36,29 +36,33 @@ main {
   }
 
   .colors {
-    background: $dark;
-    border: 1px solid $light;
-    position: relative;
+    // background: $dark;
+    // border: 1px solid $light;
+    // position: relative;
 
     .color-picker {
-      display: none;
-      width: 200px;
+      display: block;
+      width: 30px;
       height: 30px;
-      position: absolute;
-      top: 50%;
-      left: 30px;
-      transform: translateY(-50%);
+      padding: 0;
+      margin: 0;
+      // width: 200px;
+      // height: 30px;
+      // position: absolute;
+      // top: 50%;
+      // left: 30px;
+      // transform: translateY(-50%);
 
-      &:focus {
-        display: block;
-      }
+      // &:focus {
+      //   display: block;
+      // }
     }
 
-    &:hover {
-      .color-picker {
-        display: block;
-      }
-    }
+    // &:hover {
+    //   .color-picker {
+    //     display: block;
+    //   }
+    // }
   }
 
   .thickness {

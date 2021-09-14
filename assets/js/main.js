@@ -72,12 +72,22 @@ function hotKeys(e) {
             break;
         case 'KeyZ':
             if (e.ctrlKey) {
-                undo();  // Ctrl+Z
+                if (e.shiftKey) {
+                    redo();  // Ctrl+Shift+Z
+                } else {
+                    undo();  // Ctrl+Z
+                }
             }
             break;
         case 'KeyT':
-            console.log('testing:');
-            importLines();
+            if (e.shiftKey) {
+                console.log('testing: export');
+                exportLines();
+            } else {
+                console.log('testing: import');
+                importLines();
+            }
+
             break;
         case 'KeyY':
             if (e.ctrlKey) {
@@ -115,7 +125,7 @@ function draw({ clientX, clientY }) {
         ctx.lineWidth = currentWeight;
         ctx.strokeStyle = currentColor;
 
-        document.getElementById('colors').style.background = currentColor;
+        // document.getElementById('colors').style.background = currentColor;
 
         currentLine.lineTo(x, y);
 
@@ -163,8 +173,8 @@ function drawWhiteRect() {
 
 // redraws a line with its original style
 function redraw(line) {
-    console.log('REDRAW'); // DEBUGGING
-    console.log(line);
+    // console.log('REDRAW'); // DEBUGGING
+    // console.log(line);
 
     ctx.lineWidth = line.weight;
     ctx.strokeStyle = line.color;
@@ -182,10 +192,10 @@ function redrawCanvas() {
 // clears everything from canvas
 function clearCanvas() {
     if (lineList.length === 0) {
-        // console.log('NOTHING TO CLEAR');
+        // // console.log('NOTHING TO CLEAR');
         return;
     }
-    // console.log('CLEAR');
+    // // console.log('CLEAR');
 
     removeManyLines([...lineList], 0);
 
@@ -208,7 +218,7 @@ function addLine(line, index, byUser = true) {
     redraw(line);
 
     if (byUser) {
-        // console.log('added line by user');
+        // // console.log('added line by user');
         undoStack.push({ command: 'add', line, index });
         redoStack = [];
     }
@@ -221,7 +231,7 @@ function removeLine(line, index, byUser = true) {
     redrawCanvas()
     
     if (byUser) {
-        // console.log('removed line by user');
+        // // console.log('removed line by user');
         undoStack.push({ command: 'remove', line, index });
         redoStack = [];
     }
@@ -249,11 +259,11 @@ function removeManyLines(lines, index, byUser = true) {
 
 function undo() {
     if (undoStack.length === 0) {
-        console.log('CANNOT UNDO');
+        // console.log('CANNOT UNDO');
         return;
     }
 
-    console.log('undo');
+    // console.log('undo');
     undoCommand = undoStack.pop();
     redoStack.push(undoCommand);
 
@@ -278,11 +288,11 @@ function undo() {
 
 function redo() {
     if (redoStack.length === 0) {
-        console.log('CANNOT REDO');
+        // console.log('CANNOT REDO');
         return;
     }
 
-    console.log('redo');
+    // console.log('redo');
     redoCommand = redoStack.pop();
     undoStack.push(redoCommand);
 
