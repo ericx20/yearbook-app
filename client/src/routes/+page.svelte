@@ -1,10 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
+    import { PUBLIC_SERVER_URL } from '$env/static/public';
 
     let testMessage = "" 
     async function getTestMessage() {
         try {
-            const response = await fetch("http://localhost:3000/")
+            const response = await fetch(PUBLIC_SERVER_URL)
             testMessage = await response.text()
         } catch (error) {
             console.error(error)
