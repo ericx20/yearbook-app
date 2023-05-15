@@ -3,7 +3,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import Page from './models/page';
-import crypto from 'crypto';
 
 const app = express()
 dotenv.config()
@@ -23,14 +22,9 @@ const db = mongoose.connection
 db.on('error', (error) => console.error(error))
 db.once('open', () => console.log('Connected to yearbook database!'));
 
-// TODO: remove
-app.get('/', (req, res) => {
-  res.send('Hi mom!')
-})
-
 app.get('/page/:id', (req, res) => {
-  const id = req.params.id
-  Page.findById(id).then(page => {
+  const _id = req.params.id
+  Page.findById(_id).then(page => {
     if (!page) {
       return res.status(404).json({ message: 'Cannot find page' })
     }
@@ -49,6 +43,22 @@ app.post('/page', (req, res) => {
     res.status(201).send(page)
   }).catch(e => {
     res.status(400).send(e)
+  })
+})
+
+// UPDATE A YEARBOOK (with query string for ID, and JSON for canvas)
+// "signing a yearbook" corresponds to updating the canvas of a page
+// updateOne won't send back the updated page
+app.patch('/page/:id', (req, res) => {
+  const _id = req.params.id;
+
+  Page.updateOne({ _id }, req.body).then((page) => {
+      if (!page) {
+          return res.status(404).send()
+      }
+      res.status(200).send()
+  }).catch(() => {
+      res.status(500).send()
   })
 })
 

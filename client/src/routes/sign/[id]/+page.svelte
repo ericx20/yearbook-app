@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Line, Canvas } from '../../../types.js';
+    import { PUBLIC_SERVER_URL } from '$env/static/public';
+
+	export let data;
 
 	const WIDTH = 624;
 	const HEIGHT = 800;
@@ -8,8 +11,6 @@
 	type SingleCommand = 'add' | 'remove';
 	type MultipleCommand = 'addMany' | 'removeMany';
 	type Command = SingleCommand | MultipleCommand;
-
-	export let data;
 
 	let canvasElement: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D | null;
@@ -230,14 +231,29 @@
 		}
 	}
 
+	async function updatePage(id: string, canvas: Canvas) {
+        const response = await fetch(`${PUBLIC_SERVER_URL}page/${id}/`, {
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ canvas })
+        })
+        return response;
+    }
+
+	async function handleSave() {
+		await updatePage(data.page._id, canvas)
+		// TODO: redirect
+	}
+
 	onMount(() => {
 		ctx = canvasElement.getContext('2d');
 		if (ctx) ctx.lineCap = 'round';
-  	redrawCanvas()
+  		redrawCanvas()
 	});
 </script>
 
-<!-- <h1>hello there! {data.page._id}</h1> -->
 <div class="page">
 	<canvas
 		bind:this={canvasElement}
@@ -271,6 +287,9 @@
     <!-- <a class="button download" title="Download image" on:click={downloadImage} target="_blank" download="export.png" href="">
         <img alt="↓" />
     </a> -->
+	<button class="button" on:click={handleSave}>
+		<img alt="sign" />
+	</button>
 	</main>
 </div>
 
