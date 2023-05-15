@@ -1,20 +1,19 @@
 <script lang="ts">
-    import { PUBLIC_SERVER_URL } from '$env/static/public';
-    import type { Canvas } from '../types';
-
-    async function createPage() {
-        const canvas: Canvas = []
-
-        const response = await fetch(`${PUBLIC_SERVER_URL}page/`, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ canvas })
-        })
-        return response;
-    }
+    import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 </script>
 
-<h1>Create a page!</h1>
-<button on:click="{createPage}">Do it now!</button>
+<AppShell>
+    <svelte:fragment slot="header">
+        <AppBar>
+            <h1 class="h1">Online Yearbook Signing</h1>
+        </AppBar>
+    <slot>
+        <div class="grid grid-cols-3 gap-4 p-4">
+            <a href="/create" class="card card-hover h-52 grid place-content-center">
+                <p>Create a signing page</p>
+            </a>
+        </div>
+    </slot>
+
+    </svelte:fragment>
+</AppShell>
