@@ -1,22 +1,55 @@
-import express, { Express } from 'express';
+import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import Page from './models/page';
+import crypto from 'crypto';
 
-dotenv.config();
-
-const app: Express = express()
+const app = express()
+dotenv.config()
 const port = process.env.PORT || 3000
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(', ') ?? []
-
-console.log(allowedOrigins)
 
 app.use(cors({
   origin: allowedOrigins,
 }))
 
+app.use(express.json())
+
+// mongoose
+mongoose.connect(process.env.DATABASE_URL ?? "")
+const db = mongoose.connection
+db.on('error', (error) => console.error(error))
+db.once('open', () => console.log('Connected to yearbook database!'));
+
+// TODO: remove
 app.get('/', (req, res) => {
   res.send('Hi mom!')
+})
+
+app.get('/page/:id', (req, res) => {
+  const id = req.params.id
+  Page.findById(id).then(page => {
+    if (!page) {
+      return res.status(404).json({ message: 'Cannot find page' })
+    }
+    res.send(page)
+  }).catch(e => {
+    res.status(500).send(e)
+  })
+})
+
+
+app.post('/page', (req, res) => {
+  const { canvas } = req.body
+  const page = new Page({ canvas })
+
+  page.save().then(() => {
+    res.status(201).send(page)
+  }).catch(e => {
+    res.status(400).send(e)
+  })
 })
 
 app.listen(port, () => {
