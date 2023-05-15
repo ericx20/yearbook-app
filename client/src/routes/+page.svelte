@@ -3,7 +3,6 @@
     import type { Canvas } from '../types';
 
     async function createPage() {
-        // for now: create a page with an arbitrary canvas
         const canvas: Canvas = []
 
         const response = await fetch(`${PUBLIC_SERVER_URL}page/`, {

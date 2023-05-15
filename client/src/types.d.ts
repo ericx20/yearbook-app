@@ -1,8 +1,10 @@
-export type Canvas = {
+export type Line = {
     points: {
         x: number;
         y: number;
     }[];
     color: string;
-    weight: string;
-}[]
+    weight: number;
+}
+
+export type Canvas = Line[]
