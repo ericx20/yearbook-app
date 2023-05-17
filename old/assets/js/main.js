@@ -165,12 +165,14 @@ function stop() {
 
 // -------- CANVAS -------- //
 
+// RENAMED to fillWithWhite()
 // overwrites entire canvas with white
 function drawWhiteRect() {
     ctx.fillStyle = WHITE;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 }
 
+// RENAMED to drawLine
 // redraws a line with its original style
 function redraw(line) {
     // console.log('REDRAW'); // DEBUGGING
