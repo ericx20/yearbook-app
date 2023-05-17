@@ -2,17 +2,32 @@
 	import { onMount } from 'svelte';
 	import type { Line, Canvas } from '../../../types.js';
     import { PUBLIC_SERVER_URL } from '$env/static/public';
+	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
+	import { Modal, modalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent } from '@skeletonlabs/skeleton';
 
-	export let data;
+	import { goto } from '$app/navigation';
+	import penIcon from '$lib/assets/pen.png'
+	import eraserIcon from '$lib/assets/eraser.png'
+	import undoIcon from '$lib/assets/undo.png'
+	import redoIcon from '$lib/assets/redo.png'
+	import downloadIcon from '$lib/assets/download.png'
+	import deleteIcon from '$lib/assets/delete.png'
 
-	const WIDTH = 624;
-	const HEIGHT = 800;
+    import type { PageData } from './$types';
+	
+	export let data: PageData;
+
+	const WIDTH = 500;
+	const HEIGHT = 700;
 	type Tool = 'pen' | 'eraser';
 	type SingleCommand = 'add' | 'remove';
 	type MultipleCommand = 'addMany' | 'removeMany';
 	type Command = SingleCommand | MultipleCommand;
 
 	let canvasElement: HTMLCanvasElement;
+	let downloadButton: HTMLAnchorElement;
+
 	let ctx: CanvasRenderingContext2D | null;
 
 	// drawing state
@@ -56,8 +71,10 @@
 	function draw(e: MouseEvent) {
 		if (!isDrawing || !ctx) return;
 
-		const x = e.clientX - (window.innerWidth - WIDTH) / 2;
-		const y = e.clientY - (window.innerHeight - HEIGHT) / 2;
+		const rect = canvasElement.getBoundingClientRect()
+
+		const x = e.clientX - rect.left;
+		const y = e.clientY - rect.top;
 
 		if (activeTool === 'pen') {
 			ctx.lineWidth = currentWeight;
@@ -129,12 +146,6 @@
 		fillWithWhite();
 		canvas.forEach(drawLine);
 	}
-
-	function clearCanvas() {
-		// removemanylines
-		fillWithWhite();
-	}
-
 	// commands
 	function addLine(line: Line, index: number, addToHistory = true) {
 		canvas.splice(index, 0, line);
@@ -213,9 +224,9 @@
     }
 		undoStack.push(redoCommand);
 
-		// execute the command NOT as user
 		const { command, index } = redoCommand;
 
+		// execute the command without adding to history
 		switch (command) {
 			case 'add':
 				addLine(redoCommand.line, index, false);
@@ -231,6 +242,11 @@
 		}
 	}
 
+	function downloadImage() {
+		let dataURL = canvasElement.toDataURL('image/png');
+		downloadButton.href = dataURL;
+	}
+
 	async function updatePage(id: string, canvas: Canvas) {
         const response = await fetch(`${PUBLIC_SERVER_URL}page/${id}/`, {
             method: "PATCH",
@@ -242,9 +258,33 @@
         return response;
     }
 
+	async function deletePage(id: string, pin: string) {
+		const response = await fetch(`${PUBLIC_SERVER_URL}page/${id}?pin=${pin}`, {
+            method: "DELETE"
+        })
+        return response;
+	}
+
 	async function handleSave() {
-		await updatePage(data.page._id, canvas)
-		// TODO: redirect
+		const response = await updatePage(data.page._id, canvas)
+		if (!response.ok) return
+		// todo: say thanks
+		goto('/')
+	}
+
+	function handleDelete() {
+		const modal: ModalSettings = {
+			type: 'prompt',
+			title: 'Hold up!',
+			body: 'Are you sure you want to delete this yearbook? Enter PIN to prove it\'s yours',
+			value: '',
+			valueAttr: { type: 'text' },
+			response: async (pin) => {
+				await deletePage(data.page._id, pin)
+				goto('/')
+			},
+		}
+		modalStore.trigger(modal)
 	}
 
 	onMount(() => {
@@ -254,79 +294,69 @@
 	});
 </script>
 
-<div class="page">
-	<canvas
-		bind:this={canvasElement}
-		width={WIDTH}
-		height={HEIGHT}
-		on:mousedown={start}
-		on:mousemove={draw}
-		on:mouseup={stop}
-	/>
-	<main>
-		<section class="colors" id="colors">
-			<input type="color" class="color-picker" bind:value={currentColor} />
-		</section>
-		<section class="thickness">
-			<input type="number" class="stroke-weight" bind:value={currentWeight} />
-		</section>
-		<button class="button clear" title="Clear canvas (X)" on:click={clearCanvas}>X</button>
-		<button class="button pen" title="Pen (B)" on:click={activatePen}>
-			<!-- TODO: Fix icons -->
-			<img alt="Draw" />
-		</button>
-		<button class="button erase" title="Erase (E)" on:click={activateEraser}>
-			<img alt="Erase" />
-		</button>
-    <button class="button undo" title="Undo (Ctrl+Z)" on:click={undo}>
-        <img alt="undo" />
-    </button>
-    <button class="button redo" title="Redo (Ctrl+Y)" on:click={redo}>
-        <img alt="redo" />
-    </button>
-    <!-- <a class="button download" title="Download image" on:click={downloadImage} target="_blank" download="export.png" href="">
-        <img alt="↓" />
-    </a> -->
-	<button class="button" on:click={handleSave}>
-		<img alt="sign" />
-	</button>
-	</main>
-</div>
+<AppShell class="h-screen">
+    <svelte:fragment slot="header">
+        <AppBar gap="0" slotTrail="place-content-end">
+			<h2 class="h2">Sign {data.page.name ? `${data.page.name}'s ` : ''}Yearbook Page</h2>
+			<svelte:fragment slot="trail">
+				<button class="btn variant-filled" on:click={handleSave}>Sign!</button>
+			</svelte:fragment>
+        </AppBar>
+    </svelte:fragment>
+	<svelte:fragment slot="sidebarLeft">
+		<div class="sidebar p-3 bg-blue-200">
+			<section class="colors mb-[15px]" id="colors">
+				<input type="color" class="color-picker" bind:value={currentColor} />
+			</section>
+			<section class="thickness mb-[15px]">
+				<input type="number" class="stroke-weight" bind:value={currentWeight} />
+			</section>
+			<button class="button pen" class:selected={activeTool === 'pen'} title="Pen (B)" on:click={activatePen}>
+				<!-- TODO: Fix icons -->
+				<img src={penIcon} alt="Draw" />
+			</button>
+			<button class="button erase" class:selected={activeTool === 'eraser'} title="Erase (E)" on:click={activateEraser}>
+				<img src={eraserIcon} alt="Erase" />
+			</button>
+			<button class="button undo" title="Undo (Ctrl+Z)" on:click={undo}>
+				<img src={undoIcon} alt="undo" />
+			</button>
+			<button class="button redo" title="Redo (Ctrl+Y)" on:click={redo}>
+				<img src={redoIcon} alt="redo" />
+			</button>
+			<a bind:this={downloadButton} class="button download" title="Download image" on:click={downloadImage} target="_blank" download="export.png">
+				<img src={downloadIcon} alt="download" />
+			</a>
+			<button class="button delete" title="Delete" on:click={handleDelete}>
+				<img src={deleteIcon} alt="delete" />
+			</button>
+		</div>
+	</svelte:fragment>
+    <slot>
+		<div class="h-full flex justify-center items-center">
+			<canvas
+				bind:this={canvasElement}
+				width={WIDTH}
+				height={HEIGHT}
+				on:mousedown={start}
+				on:mousemove={draw}
+				on:mouseup={stop}
+			/>
+		</div>
+	</slot>
+</AppShell>	
 
 <style lang="scss">
-	$primary: #ffce00;
+	$primary: #e9d5ff;
 	$dark: #171717;
 	$darker: black;
 	$light: #f3f3f3;
 
-	.page {
-		margin: 0;
-		padding: 0;
-		width: 100vw;
-		height: 100vh;
-		background: $darker;
-		font-family: 'Roboto', 'Helvetica', sans-serif;
-
-		canvas {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			background-color: white;
-		}
-	}
-
-	main {
-		position: absolute;
-		top: 0;
-		left: 0;
-		bottom: 0;
-		width: 50px;
-		background: $dark;
+	.sidebar {
+		height: 100%;
 
 		section {
 			display: block;
-			margin: 15px auto;
 			width: 30px;
 			height: 30px;
 		}
@@ -343,7 +373,7 @@
 
 		.thickness {
 			position: relative;
-			background-color: $light;
+			background-color: white;
 			&::after {
 				content: '';
 				position: absolute;
@@ -385,24 +415,18 @@
 			color: $dark;
 			font-size: 8px;
 			font-weight: 900;
-			background-color: $light;
+			background-color: white;
 			border: none;
 			outline: none;
 			cursor: pointer;
 
-			img {
-				max-width: 100%;
-				max-height: 100%;
+			&.selected {
+				background-color: $primary;
 			}
-		}
-		.button.clear {
-			font-size: 20px;
-		}
 
-		.button.download img {
-			max-width: 18px;
-			max-height: 18px;
-			transform: translate(6px, 6px);
+			img {
+				padding: 5px;
+			}
 		}
 	}
 </style>

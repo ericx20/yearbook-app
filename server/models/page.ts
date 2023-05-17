@@ -5,6 +5,14 @@ const pageSchema = new mongoose.Schema({
         type: Object,
         required: true,
     },
+    name: {
+        type: String,
+        required: true,
+    },
+    pin: {
+        type: String,
+        required: true,
+    }
 })
 
 const Page = mongoose.model('Page', pageSchema);

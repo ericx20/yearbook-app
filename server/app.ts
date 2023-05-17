@@ -36,8 +36,8 @@ app.get('/page/:id', (req, res) => {
 
 
 app.post('/page', (req, res) => {
-  const { canvas } = req.body
-  const page = new Page({ canvas })
+  const { canvas, name, pin } = req.body
+  const page = new Page({ canvas, name, pin })
 
   page.save().then(() => {
     res.status(201).send(page)
@@ -56,6 +56,17 @@ app.patch('/page/:id', (req, res) => {
       if (!page) {
           return res.status(404).send()
       }
+      res.status(200).send()
+  }).catch(() => {
+      res.status(500).send()
+  })
+})
+
+app.delete('/page/:id', (req, res) => {
+  const _id = req.params.id;
+  const pin = req.query.pin;
+
+  Page.deleteOne({ _id, pin }).then(() => {
       res.status(200).send()
   }).catch(() => {
       res.status(500).send()

@@ -2,10 +2,10 @@
     import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 </script>
 
-<AppShell>
+<AppShell class="h-screen">
     <svelte:fragment slot="header">
         <AppBar>
-            <h1 class="h1">Online Yearbook Signing</h1>
+            <h2 class="h2">Online Yearbook Signing</h2>
         </AppBar>
     <slot>
         <div class="grid grid-cols-3 gap-4 p-4">

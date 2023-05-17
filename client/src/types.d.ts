@@ -8,3 +8,10 @@ export type Line = {
 }
 
 export type Canvas = Line[]
+
+export type Page = {
+    _id: string,
+    canvas: Canvas,
+    name: string,
+    pin: string,
+}
