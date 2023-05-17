@@ -1,21 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Line, Canvas } from '../../../types.js';
-    import { PUBLIC_SERVER_URL } from '$env/static/public';
+	import { PUBLIC_SERVER_URL } from '$env/static/public';
 	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 	import { Modal, modalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ModalComponent } from '@skeletonlabs/skeleton';
 
 	import { goto } from '$app/navigation';
-	import penIcon from '$lib/assets/pen.png'
-	import eraserIcon from '$lib/assets/eraser.png'
-	import undoIcon from '$lib/assets/undo.png'
-	import redoIcon from '$lib/assets/redo.png'
-	import downloadIcon from '$lib/assets/download.png'
-	import deleteIcon from '$lib/assets/delete.png'
+	import penIcon from '$lib/assets/pen.png';
+	import eraserIcon from '$lib/assets/eraser.png';
+	import undoIcon from '$lib/assets/undo.png';
+	import redoIcon from '$lib/assets/redo.png';
+	import downloadIcon from '$lib/assets/download.png';
+	import deleteIcon from '$lib/assets/delete.png';
 
-    import type { PageData } from './$types';
-	
+	import type { PageData } from './$types';
+
 	export let data: PageData;
 
 	const WIDTH = 500;
@@ -71,7 +71,7 @@
 	function draw(e: MouseEvent) {
 		if (!isDrawing || !ctx) return;
 
-		const rect = canvasElement.getBoundingClientRect()
+		const rect = canvasElement.getBoundingClientRect();
 
 		const x = e.clientX - rect.left;
 		const y = e.clientY - rect.top;
@@ -192,10 +192,10 @@
 	// history utilities
 	function undo() {
 		const undoCommand = undoStack.pop();
-    if (!undoCommand) {
-      // empty undo stack, can't undo
-      return;
-    }
+		if (!undoCommand) {
+			// empty undo stack, can't undo
+			return;
+		}
 		redoStack.push(undoCommand);
 
 		// execute the inverse of the command without adding to history
@@ -218,10 +218,10 @@
 
 	function redo() {
 		const redoCommand = redoStack.pop();
-    if (!redoCommand) {
-      // empty redo stack, can't undo
-      return;
-    }
+		if (!redoCommand) {
+			// empty redo stack, can't undo
+			return;
+		}
 		undoStack.push(redoCommand);
 
 		const { command, index } = redoCommand;
@@ -248,48 +248,48 @@
 	}
 
 	async function updatePage(id: string, canvas: Canvas) {
-        const response = await fetch(`${PUBLIC_SERVER_URL}page/${id}/`, {
-            method: "PATCH",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ canvas })
-        })
-        return response;
-    }
+		const response = await fetch(`${PUBLIC_SERVER_URL}page/${id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ canvas })
+		});
+		return response;
+	}
 
 	async function deletePage(id: string, pin: string) {
 		const response = await fetch(`${PUBLIC_SERVER_URL}page/${id}?pin=${pin}`, {
-            method: "DELETE"
-        })
-        return response;
+			method: 'DELETE'
+		});
+		return response;
 	}
 
 	async function handleSave() {
-		const response = await updatePage(data.page._id, canvas)
-		if (!response.ok) return
+		const response = await updatePage(data.page._id, canvas);
+		if (!response.ok) return;
 		// todo: say thanks
-		goto('/')
+		goto('/');
 	}
 
 	function handleDelete() {
 		const modal: ModalSettings = {
 			type: 'prompt',
 			title: 'Hold up!',
-			body: 'Are you sure you want to delete this yearbook? Enter PIN to prove it\'s yours',
+			body: "Are you sure you want to delete this yearbook? Enter PIN to prove it's yours",
 			value: '',
 			valueAttr: { type: 'text' },
 			response: async (pin) => {
-				const response = await deletePage(data.page._id, pin)
-				console.log(response)
+				const response = await deletePage(data.page._id, pin);
+				console.log(response);
 				if (response.status === 200) {
-					goto('/')
+					goto('/');
 					return;
 				}
-				alert('The PIN is incorrect!')
-			},
-		}
-		modalStore.trigger(modal)
+				alert('The PIN is incorrect!');
+			}
+		};
+		modalStore.trigger(modal);
 	}
 
 	function beforeUnload(e: BeforeUnloadEvent) {
@@ -300,20 +300,20 @@
 	onMount(() => {
 		ctx = canvasElement.getContext('2d');
 		if (ctx) ctx.lineCap = 'round';
-  		redrawCanvas()
+		redrawCanvas();
 	});
 </script>
 
-<svelte:window on:beforeunload|preventDefault={beforeUnload}/>
+<svelte:window on:beforeunload|preventDefault={beforeUnload} />
 <AppShell class="h-screen">
-    <svelte:fragment slot="header">
-        <AppBar gap="0" slotTrail="place-content-end">
+	<svelte:fragment slot="header">
+		<AppBar gap="0" slotTrail="place-content-end">
 			<h2 class="h2">Sign {data.page.name ? `${data.page.name}'s ` : ''}Yearbook Page</h2>
 			<svelte:fragment slot="trail">
 				<button class="btn variant-filled" on:click={handleSave}>Sign!</button>
 			</svelte:fragment>
-        </AppBar>
-    </svelte:fragment>
+		</AppBar>
+	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<div class="sidebar p-3 bg-blue-200">
 			<section class="colors mb-[15px]" id="colors">
@@ -322,11 +322,21 @@
 			<section class="thickness mb-[15px]">
 				<input type="number" class="stroke-weight" bind:value={currentWeight} />
 			</section>
-			<button class="button pen" class:selected={activeTool === 'pen'} title="Pen (B)" on:click={activatePen}>
+			<button
+				class="button pen"
+				class:selected={activeTool === 'pen'}
+				title="Pen (B)"
+				on:click={activatePen}
+			>
 				<!-- TODO: Fix icons -->
 				<img src={penIcon} alt="Draw" />
 			</button>
-			<button class="button erase" class:selected={activeTool === 'eraser'} title="Erase (E)" on:click={activateEraser}>
+			<button
+				class="button erase"
+				class:selected={activeTool === 'eraser'}
+				title="Erase (E)"
+				on:click={activateEraser}
+			>
 				<img src={eraserIcon} alt="Erase" />
 			</button>
 			<button class="button undo" title="Undo (Ctrl+Z)" on:click={undo}>
@@ -335,7 +345,14 @@
 			<button class="button redo" title="Redo (Ctrl+Y)" on:click={redo}>
 				<img src={redoIcon} alt="redo" />
 			</button>
-			<a bind:this={downloadButton} class="button download" title="Download image" on:click={downloadImage} target="_blank" download="export.png">
+			<a
+				bind:this={downloadButton}
+				class="button download"
+				title="Download image"
+				on:click={downloadImage}
+				target="_blank"
+				download="export.png"
+			>
 				<img src={downloadIcon} alt="download" />
 			</a>
 			<button class="button delete" title="Delete" on:click={handleDelete}>
@@ -343,7 +360,7 @@
 			</button>
 		</div>
 	</svelte:fragment>
-    <slot>
+	<slot>
 		<div class="h-full flex justify-center items-center">
 			<canvas
 				bind:this={canvasElement}
@@ -355,7 +372,7 @@
 			/>
 		</div>
 	</slot>
-</AppShell>	
+</AppShell>
 
 <style lang="scss">
 	$primary: #e9d5ff;
