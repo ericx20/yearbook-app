@@ -280,11 +280,21 @@
 			value: '',
 			valueAttr: { type: 'text' },
 			response: async (pin) => {
-				await deletePage(data.page._id, pin)
-				goto('/')
+				const response = await deletePage(data.page._id, pin)
+				console.log(response)
+				if (response.status === 200) {
+					goto('/')
+					return;
+				}
+				alert('The PIN is incorrect!')
 			},
 		}
 		modalStore.trigger(modal)
+	}
+
+	function beforeUnload(e: BeforeUnloadEvent) {
+		e.returnValue = '';
+		return '...';
 	}
 
 	onMount(() => {
@@ -294,6 +304,7 @@
 	});
 </script>
 
+<svelte:window on:beforeunload|preventDefault={beforeUnload}/>
 <AppShell class="h-screen">
     <svelte:fragment slot="header">
         <AppBar gap="0" slotTrail="place-content-end">

@@ -66,7 +66,10 @@ app.delete('/page/:id', (req, res) => {
   const _id = req.params.id;
   const pin = req.query.pin;
 
-  Page.deleteOne({ _id, pin }).then(() => {
+  Page.deleteOne({ _id, pin }).then(r => {
+      if (!r.deletedCount) {
+        res.status(404).send()
+      }
       res.status(200).send()
   }).catch(() => {
       res.status(500).send()
